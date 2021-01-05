@@ -29,17 +29,21 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_DEVICE_H
 #define OPENNI2_DEVICE_H
 
+#include "OpenNI.h"
+
 #include "openni2_camera/openni2_video_mode.h"
-
 #include "openni2_camera/openni2_exception.h"
+#include "openni2_camera/openni2_frame_listener.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstdint>
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
@@ -48,128 +52,189 @@
 #include <vector>
 
 namespace openni
-{
+   {
 class Device;
 class DeviceInfo;
 class VideoStream;
 class SensorInfo;
-}
+   }  // namespace openni
 
 namespace openni2_wrapper
-{
-
-typedef boost::function<void(sensor_msgs::msg::Image::SharedPtr image)> FrameCallbackFunction;
-
-class OpenNI2FrameListener;
+   {
 
 class OpenNI2Device
-{
-public:
-  OpenNI2Device(const std::string& device_URI,
-                rclcpp::Node* node) throw (OpenNI2Exception);
-  virtual ~OpenNI2Device();
+   {
+   public:
+   OpenNI2Device(const std::string& device_URI, rclcpp::Node* node);
+   virtual ~OpenNI2Device();
 
-  const std::string getUri() const;
-  const std::string getVendor() const;
-  const std::string getName() const;
-  uint16_t getUsbVendorId() const;
-  uint16_t getUsbProductId() const;
+   const std::string getUri() const
+      {
+      return (std::string(device_info_->getUri()));
+      }
 
-  const std::string getStringID() const;
+   const std::string getVendor() const
+      {
+      return (std::string(device_info_->getVendor()));
+      }
 
-  bool isValid() const;
+   const std::string getName() const
+      {
+      return (std::string(device_info_->getName()));
+      }
 
-  bool hasIRSensor() const;
-  bool hasColorSensor() const;
-  bool hasDepthSensor() const;
+   uint16_t getUsbVendorId() const
+      {
+      return (device_info_->getUsbVendorId());
+      }
 
-  void startIRStream();
-  void startColorStream();
-  void startDepthStream();
+   uint16_t getUsbProductId() const
+      {
+      return (device_info_->getUsbProductId());
+      }
 
-  void stopAllStreams();
+   const std::string getStringID() const;
 
-  void stopIRStream();
-  void stopColorStream();
-  void stopDepthStream();
+   bool isValid() const
+      {
+      return ((openni_device_.get() != 0) && openni_device_->isValid());
+      }
 
-  bool isIRStreamStarted();
-  bool isColorStreamStarted();
-  bool isDepthStreamStarted();
+   bool hasIRSensor() const
+      {
+      return (openni_device_->hasSensor(openni::SENSOR_IR));
+      }
 
-  bool isImageRegistrationModeSupported() const;
-  void setImageRegistrationMode(bool enabled) throw (OpenNI2Exception);
-  void setDepthColorSync(bool enabled) throw (OpenNI2Exception);
+   bool hasColorSensor() const
+      {
+      return (openni_device_->hasSensor(openni::SENSOR_COLOR));
+      }
 
-  const OpenNI2VideoMode getIRVideoMode() throw (OpenNI2Exception);
-  const OpenNI2VideoMode getColorVideoMode() throw (OpenNI2Exception);
-  const OpenNI2VideoMode getDepthVideoMode() throw (OpenNI2Exception);
+   bool hasDepthSensor() const
+      {
+      return (openni_device_->hasSensor(openni::SENSOR_DEPTH));
+      }
 
-  const std::vector<OpenNI2VideoMode>& getSupportedIRVideoModes() const;
-  const std::vector<OpenNI2VideoMode>& getSupportedColorVideoModes() const;
-  const std::vector<OpenNI2VideoMode>& getSupportedDepthVideoModes() const;
+   void startIRStream();
+   void startColorStream();
+   void startDepthStream();
 
-  bool isIRVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
-  bool isColorVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
-  bool isDepthVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
+   void stopAllStreams();
 
-  void setIRVideoMode(const OpenNI2VideoMode& video_mode) throw (OpenNI2Exception);
-  void setColorVideoMode(const OpenNI2VideoMode& video_mode) throw (OpenNI2Exception);
-  void setDepthVideoMode(const OpenNI2VideoMode& video_mode) throw (OpenNI2Exception);
+   void stopIRStream();
+   void stopColorStream();
+   void stopDepthStream();
 
-  void setIRFrameCallback(FrameCallbackFunction callback);
-  void setColorFrameCallback(FrameCallbackFunction callback);
-  void setDepthFrameCallback(FrameCallbackFunction callback);
+   bool isIRStreamStarted() const
+      {
+      return (ir_video_started_);
+      }
 
-  float getIRFocalLength (int output_y_resolution) const;
-  float getColorFocalLength (int output_y_resolution) const;
-  float getDepthFocalLength (int output_y_resolution) const;
-  float getBaseline () const;
+   bool isColorStreamStarted() const
+      {
+      return (color_video_started_);
+      }
 
-  void setAutoExposure(bool enable) throw (OpenNI2Exception);
-  void setAutoWhiteBalance(bool enable) throw (OpenNI2Exception);
-  void setExposure(int exposure) throw (OpenNI2Exception);
+   bool isDepthStreamStarted() const
+      {
+      return (depth_video_started_);
+      }
 
-  bool getAutoExposure() const;
-  bool getAutoWhiteBalance() const;
-  int getExposure() const;
+   bool isImageRegistrationModeSupported() const
+      {
+      return (openni_device_->isImageRegistrationModeSupported(openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR));
+      }
 
-  void setUseDeviceTimer(bool enable);
+   void setImageRegistrationMode(bool enabled);
+   void setDepthColorSync(bool enabled);
 
-protected:
-  void shutdown();
+   const OpenNI2VideoMode getIRVideoMode() const;
+   const OpenNI2VideoMode getColorVideoMode() const;
+   const OpenNI2VideoMode getDepthVideoMode() const;
+   const std::vector<OpenNI2VideoMode>& getSupportedIRVideoModes() const;
+   const std::vector<OpenNI2VideoMode>& getSupportedColorVideoModes() const;
+   const std::vector<OpenNI2VideoMode>& getSupportedDepthVideoModes() const;
 
-  boost::shared_ptr<openni::VideoStream> getIRVideoStream() const throw (OpenNI2Exception);
-  boost::shared_ptr<openni::VideoStream> getColorVideoStream() const throw (OpenNI2Exception);
-  boost::shared_ptr<openni::VideoStream> getDepthVideoStream() const throw (OpenNI2Exception);
+   bool isIRVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
 
-  boost::shared_ptr<openni::Device> openni_device_;
-  boost::shared_ptr<openni::DeviceInfo> device_info_;
+   bool isColorVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
+   bool isDepthVideoModeSupported(const OpenNI2VideoMode& video_mode) const;
 
-  boost::shared_ptr<OpenNI2FrameListener> ir_frame_listener;
-  boost::shared_ptr<OpenNI2FrameListener> color_frame_listener;
-  boost::shared_ptr<OpenNI2FrameListener> depth_frame_listener;
+   void setIRVideoMode(const OpenNI2VideoMode& video_mode);
+   void setColorVideoMode(const OpenNI2VideoMode& video_mode);
+   void setDepthVideoMode(const OpenNI2VideoMode& video_mode);
 
-  mutable boost::shared_ptr<openni::VideoStream> ir_video_stream_;
-  mutable boost::shared_ptr<openni::VideoStream> color_video_stream_;
-  mutable boost::shared_ptr<openni::VideoStream> depth_video_stream_;
+   void setIRFrameCallback(FrameCallbackFunction callback)
+      {
+      ir_frame_listener->setCallback(callback);
 
-  mutable std::vector<OpenNI2VideoMode> ir_video_modes_;
-  mutable std::vector<OpenNI2VideoMode> color_video_modes_;
-  mutable std::vector<OpenNI2VideoMode> depth_video_modes_;
+      return;
+      }
 
-  bool ir_video_started_;
-  bool color_video_started_;
-  bool depth_video_started_;
+   void setColorFrameCallback(FrameCallbackFunction callback)
+      {
+      color_frame_listener->setCallback(callback);
 
-  bool image_registration_activated_;
+      return;
+      }
 
-  bool use_device_time_;
+   void setDepthFrameCallback(FrameCallbackFunction callback)
+      {
+      depth_frame_listener->setCallback(callback);
 
-};
+      return;
+      }
 
-std::ostream& operator << (std::ostream& stream, const OpenNI2Device& device);
 
-}
+   float getIRFocalLength(int output_y_resolution) const;
+   float getColorFocalLength(int output_y_resolution) const;
+   float getDepthFocalLength(int output_y_resolution) const;
+   float getBaseline() const;
+
+   void setAutoExposure(bool enable);
+   void setAutoWhiteBalance(bool enable);
+   void setExposure(int exposure);
+
+   bool getAutoExposure() const;
+   bool getAutoWhiteBalance() const;
+   int getExposure() const;
+
+   void setUseDeviceTimer(bool enable);
+
+   protected:
+
+   void shutdown();
+
+   boost::shared_ptr<openni::VideoStream> getIRVideoStream() const;
+   boost::shared_ptr<openni::VideoStream> getColorVideoStream() const;
+   boost::shared_ptr<openni::VideoStream> getDepthVideoStream() const;
+
+   boost::shared_ptr<openni::Device> openni_device_;
+   boost::shared_ptr<openni::DeviceInfo> device_info_;
+
+   boost::shared_ptr<OpenNI2FrameListener> ir_frame_listener;
+   boost::shared_ptr<OpenNI2FrameListener> color_frame_listener;
+   boost::shared_ptr<OpenNI2FrameListener> depth_frame_listener;
+
+   mutable boost::shared_ptr<openni::VideoStream> ir_video_stream_;
+   mutable boost::shared_ptr<openni::VideoStream> color_video_stream_;
+   mutable boost::shared_ptr<openni::VideoStream> depth_video_stream_;
+
+   mutable std::vector<OpenNI2VideoMode> ir_video_modes_;
+   mutable std::vector<OpenNI2VideoMode> color_video_modes_;
+   mutable std::vector<OpenNI2VideoMode> depth_video_modes_;
+
+   bool ir_video_started_;
+   bool color_video_started_;
+   bool depth_video_started_;
+
+   bool image_registration_activated_;
+
+   bool use_device_time_;
+   };
+
+std::ostream& operator<<(std::ostream& stream, const OpenNI2Device& device);
+
+   }  // namespace openni2_wrapper
 
 #endif /* OPENNI_DEVICE_H */

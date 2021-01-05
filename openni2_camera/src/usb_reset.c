@@ -31,45 +31,49 @@
  *      Author: Ryohei Ueda (ueda@jsk.t.u-tokyo.ac.jp)
  */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 #include <linux/usbdevice_fs.h>
 
+int main(int argc, char** argv)
+   {
+   const char* filename;
+   int fd;
+   int rc;
 
-int main(int argc, char **argv)
-{
-  const char *filename;
-  int fd;
-  int rc;
+   if (argc != 2)
+      {
+      fprintf(stderr, "Usage: usb_reset device-filename\n");
+      fprintf(stderr, "\n");
+      fprintf(stderr, "For instance if lsusb shows 'Bus 002 Device 013' for your camera\n");
+      fprintf(stderr, "You would call with:\n");
+      fprintf(stderr, "  ros2 run openni2_camera usb_reset /dev/bus/usb/002/013\n");
+      return 1;
+      }
 
-  if (argc != 2) {
-    fprintf(stderr, "Usage: usb_reset device-filename\n");
-    fprintf(stderr, "\n");
-    fprintf(stderr, "For instance if lsusb shows 'Bus 002 Device 013' for your camera\n");
-    fprintf(stderr, "You would call with:\n");
-    fprintf(stderr, "  ros2 run openni2_camera usb_reset /dev/bus/usb/002/013\n");
-    return 1;
-  }
-  filename = argv[1];
+   filename = argv[1];
 
-  fd = open(filename, O_WRONLY);
-  if (fd < 0) {
-    perror("Error opening output file");
-    return 1;
-  }
+   fd = open(filename, O_WRONLY);
+   if (fd < 0)
+      {
+      perror("Error opening output file");
+      return 1;
+      }
 
-  printf("Resetting USB device %s\n", filename);
-  rc = ioctl(fd, USBDEVFS_RESET, 0);
-  if (rc < 0) {
-    perror("Error in ioctl");
-    return 1;
-  }
-  printf("Reset successful\n");
+   printf("Resetting USB device %s\n", filename);
+   rc = ioctl(fd, USBDEVFS_RESET, 0);
+   if (rc < 0)
+      {
+      perror("Error in ioctl");
+      return 1;
+      }
 
-  close(fd);
-  return 0;
-}
+   printf("Reset successful\n");
+   close(fd);
+
+   return 0;
+   }

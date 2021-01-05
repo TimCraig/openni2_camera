@@ -34,51 +34,27 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
 #include "openni2_camera/openni2_exception.h"
 #include <sstream>
 
 namespace openni2_wrapper
-{
+   {
 
-OpenNI2Exception::OpenNI2Exception (const std::string& function_name, const std::string& file_name, unsigned line_number, const std::string& message) throw ()
-: function_name_ (function_name)
-, file_name_ (file_name)
-, line_number_ (line_number)
-, message_ (message)
-{
-  std::stringstream sstream;
-  sstream << function_name_ << " @ " << file_name_ << " @ " << line_number_ << " : " << message_;
-  message_long_ = sstream.str();
-}
+OpenNI2Exception::OpenNI2Exception(
+      const std::string& function_name, const std::string& file_name, unsigned line_number, const std::string& message)
+   : function_name_(function_name), file_name_(file_name), line_number_(line_number), message_(message)
+   {
+   std::stringstream sstream;
+   sstream << function_name_ << " @ " << file_name_ << " @ " << line_number_ << " : " << message_;
+   message_long_ = sstream.str();
 
-OpenNI2Exception::~OpenNI2Exception () throw ()
-{
-}
+   return;
+   }
 
-OpenNI2Exception& OpenNI2Exception::operator = (const OpenNI2Exception& exception) throw ()
-{
-  message_ = exception.message_;
-  return *this;
-}
+   const char* OpenNI2Exception::what() const noexcept
+    {
+    return (message_long_.c_str());
+    }
 
-const char* OpenNI2Exception::what () const throw ()
-{
-  return message_long_.c_str();
-}
-
-const std::string& OpenNI2Exception::getFunctionName () const throw ()
-{
-  return function_name_;
-}
-
-const std::string& OpenNI2Exception::getFileName () const throw ()
-{
-  return file_name_;
-}
-
-unsigned OpenNI2Exception::getLineNumber () const throw ()
-{
-  return line_number_;
-}
-
-} //namespace openni_camera
+   } // namespace openni2_wrapper

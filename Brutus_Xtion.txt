@@ -1,0 +1,5 @@
+Device #0:
+Uri: 1d27/0600@1/3 (Vendor: PrimeSense, Name: PS1080, Vendor ID: 1d27, Product ID: 600)
+
+Warning: USB events thread - failed to set priority. This might cause loss of data...
+Serial number: 1112150041

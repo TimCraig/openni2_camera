@@ -29,6 +29,8 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_DEVICE_MANAGER_H_
 #define OPENNI2_DEVICE_MANAGER_H_
 
@@ -52,12 +54,12 @@ class OpenNI2DeviceManager
 {
 public:
   OpenNI2DeviceManager();
-  virtual ~OpenNI2DeviceManager();
+  virtual ~OpenNI2DeviceManager() = default;
 
   static boost::shared_ptr<OpenNI2DeviceManager> getSingelton();
 
-  boost::shared_ptr<std::vector<OpenNI2DeviceInfo> > getConnectedDeviceInfos() const;
-  boost::shared_ptr<std::vector<std::string> > getConnectedDeviceURIs() const;
+  boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos() const;
+  boost::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs() const;
   std::size_t getNumOfConnectedDevices() const;
 
   boost::shared_ptr<OpenNI2Device> getAnyDevice(rclcpp::Node* node);
@@ -74,6 +76,6 @@ protected:
 
 std::ostream& operator <<(std::ostream& stream, const OpenNI2DeviceManager& device_manager);
 
-}
+}  // end of namespace openni2_wrappe
 
 #endif

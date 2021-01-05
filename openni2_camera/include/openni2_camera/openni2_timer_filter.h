@@ -29,6 +29,8 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_TIME_FILTER_H_
 #define OPENNI2_TIME_FILTER_H_
 
@@ -40,24 +42,29 @@ namespace openni2_wrapper
 {
 
 class OpenNI2TimerFilter
-{
-public:
-  OpenNI2TimerFilter(std::size_t filter_len);
-  virtual ~OpenNI2TimerFilter();
+  {
+  public:
+    explicit OpenNI2TimerFilter(std::size_t filter_len);
+    virtual ~OpenNI2TimerFilter() = default;
 
-  void addSample(double sample);
+    void addSample(double sample);
 
-  double getMedian();
-  double getMovingAvg();
+    double getMedian() const;
+    double getMovingAvg() const;
 
-  void clear();
+    void clear()
+      {
+      buffer_.clear();
+      return;
+      }
 
-private:
-  std::size_t filter_len_;
 
-  std::deque<double> buffer_;
-};
+  private:
+    std::size_t filter_len_;
 
-}
+    std::deque<double> buffer_;
+  };
+
+} // end of namespace openni2_wrapper
 
 #endif

@@ -29,13 +29,18 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_FRAME_LISTENER_H_
 #define OPENNI2_FRAME_LISTENER_H_
 
-#include "openni2_camera/openni2_device.h"
+//#include "openni2_camera/openni2_device.h"
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
+
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <vector>
 
@@ -45,20 +50,22 @@ namespace openni2_wrapper
 {
 
 class OpenNI2TimerFilter;
+using FrameCallbackFunction = boost::function<void(sensor_msgs::msg::Image::SharedPtr image)>;
 
 class OpenNI2FrameListener : public openni::VideoStream::NewFrameListener
 {
 public:
   OpenNI2FrameListener(rclcpp::Node* node);
 
-  virtual ~OpenNI2FrameListener()
-  { };
+  virtual ~OpenNI2FrameListener() = default;
 
   void onNewFrame(openni::VideoStream& stream);
 
   void setCallback(FrameCallbackFunction& callback)
   {
     callback_ = callback;
+
+    return;
   }
 
   void setUseDeviceTimer(bool enable);
@@ -75,6 +82,6 @@ private:
   rclcpp::Time prev_time_stamp_;
 };
 
-}
+} // end of namespace openni2_wrapper
 
 #endif

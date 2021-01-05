@@ -29,24 +29,25 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_DRIVER_H
 #define OPENNI2_DRIVER_H
 
-#include <boost/shared_ptr.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstdint>
 
 #include <sensor_msgs/msg/image.hpp>
 
-#include <image_transport/image_transport.h>
-#include <camera_info_manager/camera_info_manager.h>
+#include <camera_info_manager/camera_info_manager.hpp>
+#include <image_transport/image_transport.hpp>
 
 #include <string>
-#include <vector>
 
-#include "openni2_camera/openni2_device_manager.h"
 #include "openni2_camera/openni2_device.h"
+#include "openni2_camera/openni2_device_manager.h"
 #include "openni2_camera/openni2_video_mode.h"
 #include "openni2_camera_msgs/srv/get_serial.hpp"
 
@@ -56,130 +57,144 @@ namespace openni2_wrapper
 {
 
 class OpenNI2Driver : public rclcpp::Node
-{
-public:
-  OpenNI2Driver(const rclcpp::NodeOptions & node_options);
+   {
+ public:
+   OpenNI2Driver(const rclcpp::NodeOptions& node_options);
 
-private:
-  void newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
-  void newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
-  void newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
+ private:
+   void newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
+   void newColorFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
+   void newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr image);
 
-  // Methods to get calibration parameters for the various cameras
-  sensor_msgs::msg::CameraInfo::SharedPtr getDefaultCameraInfo(int width, int height, double f) const;
-  sensor_msgs::msg::CameraInfo::SharedPtr getColorCameraInfo(int width, int height, rclcpp::Time time) const;
-  sensor_msgs::msg::CameraInfo::SharedPtr getIRCameraInfo(int width, int height, rclcpp::Time time) const;
-  sensor_msgs::msg::CameraInfo::SharedPtr getDepthCameraInfo(int width, int height, rclcpp::Time time) const;
-  sensor_msgs::msg::CameraInfo::SharedPtr getProjectorCameraInfo(int width, int height, rclcpp::Time time) const;
+   // Methods to get calibration parameters for the various cameras
+   sensor_msgs::msg::CameraInfo::SharedPtr
+   getDefaultCameraInfo(int width, int height, double f) const;
+   sensor_msgs::msg::CameraInfo::SharedPtr
+   getColorCameraInfo(int width, int height, rclcpp::Time time) const;
+   sensor_msgs::msg::CameraInfo::SharedPtr
+   getIRCameraInfo(int width, int height, rclcpp::Time time) const;
+   sensor_msgs::msg::CameraInfo::SharedPtr
+   getDepthCameraInfo(int width, int height, rclcpp::Time time) const;
+   sensor_msgs::msg::CameraInfo::SharedPtr
+   getProjectorCameraInfo(int width, int height, rclcpp::Time time) const;
 
-  // resolves non-URI device IDs to URIs, e.g. '#1' is resolved to the URI of the first device
-  std::string resolveDeviceURI(const std::string& device_id) throw(OpenNI2Exception);
-  void initDevice();
+   // resolves non-URI device IDs to URIs, e.g. '#1' is resolved to the URI of
+   // the first device
+   std::string resolveDeviceURI(const std::string& device_id);
+   void initDevice();
 
-  void advertiseROSTopics();
+   void advertiseROSTopics();
 
-  // TODO: this is hack around two issues
-  //   First, subscription callbacks do not yet exist in ROS2
-  //   Second, we can't initialize topics in the constructor (shared_from_this doesn't work yet)
-  void periodic();
-  bool initialized_;
+   // TODO: this is hack around two issues
+   //   First, subscription callbacks do not yet exist in ROS2
+   //   Second, we can't initialize topics in the constructor (shared_from_this
+   //   doesn't work yet)
+   void periodic();
+   bool initialized_;
 
-  void monitorConnection();
-  void colorConnectCb();
-  void depthConnectCb();
-  void irConnectCb();
+   void monitorConnection();
+   void colorConnectCb();
+   void depthConnectCb();
+   void irConnectCb();
 
-  void getSerialCb(const std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Request> request,
-                   std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Response> response);
+   void getSerialCb(
+       const std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Request>
+           request,
+       std::shared_ptr<openni2_camera_msgs::srv::GetSerial::Response> response);
 
-  rcl_interfaces::msg::SetParametersResult paramCb(const std::vector<rclcpp::Parameter> parameters);
+   rcl_interfaces::msg::SetParametersResult
+   paramCb(const std::vector<rclcpp::Parameter> parameters);
 
-  void applyConfigToOpenNIDevice();
+   void applyConfigToOpenNIDevice();
 
-  void genVideoModeTableMap();
-  bool lookupVideoMode(const std::string& mode, OpenNI2VideoMode& video_mode);
+   void genVideoModeTableMap();
+   bool lookupVideoMode(const std::string& mode, OpenNI2VideoMode& video_mode);
 
-  sensor_msgs::msg::Image::ConstPtr rawToFloatingPointConversion(sensor_msgs::msg::Image::ConstPtr raw_image);
+   const sensor_msgs::msg::Image::SharedPtr rawToFloatingPointConversion(
+       const sensor_msgs::msg::Image::SharedPtr raw_image);
 
-  void setIRVideoMode(const OpenNI2VideoMode& ir_video_mode);
-  void setColorVideoMode(const OpenNI2VideoMode& color_video_mode);
-  void setDepthVideoMode(const OpenNI2VideoMode& depth_video_mode);
+   void setIRVideoMode(const OpenNI2VideoMode& ir_video_mode);
+   void setColorVideoMode(const OpenNI2VideoMode& color_video_mode);
+   void setDepthVideoMode(const OpenNI2VideoMode& depth_video_mode);
 
-  int extractBusID(const std::string& uri) const;
-  bool isConnected() const;
+   int extractBusID(const std::string& uri) const;
+   bool isConnected() const;
 
-  void forceSetExposure();
+   void forceSetExposure();
 
-  boost::shared_ptr<OpenNI2DeviceManager> device_manager_;
-  boost::shared_ptr<OpenNI2Device> device_;
+   boost::shared_ptr<OpenNI2DeviceManager> device_manager_;
+   boost::shared_ptr<OpenNI2Device> device_;
 
-  std::string device_id_;
-  int bus_id_;
+   std::string device_id_;
+   int bus_id_;
 
-  /** \brief indicates if reconnect logic is enabled. */
-  bool enable_reconnect_;
+   /** \brief indicates if reconnect logic is enabled. */
+   bool enable_reconnect_;
 
-  /** \brief get_serial server*/
-  rclcpp::Service<openni2_camera_msgs::srv::GetSerial>::SharedPtr get_serial_server;
+   /** \brief get_serial server*/
+   rclcpp::Service<openni2_camera_msgs::srv::GetSerial>::SharedPtr
+       get_serial_server;
 
-  boost::mutex connect_mutex_;
-  // published topics
-  image_transport::CameraPublisher pub_color_;
-  image_transport::CameraPublisher pub_depth_;
-  image_transport::CameraPublisher pub_depth_raw_;
-  image_transport::CameraPublisher pub_ir_;
-  rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr pub_projector_info_;
+   boost::mutex connect_mutex_;
+   // published topics
+   image_transport::CameraPublisher pub_color_;
+   image_transport::CameraPublisher pub_depth_;
+   image_transport::CameraPublisher pub_depth_raw_;
+   image_transport::CameraPublisher pub_ir_;
+   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr
+       pub_projector_info_;
 
-  /** \brief timer for connection monitoring thread */
-  rclcpp::TimerBase::SharedPtr timer_;
+   /** \brief timer for connection monitoring thread */
+   rclcpp::TimerBase::SharedPtr timer_;
 
-  /** \brief Camera info manager objects. */
-  std::shared_ptr<camera_info_manager::CameraInfoManager> color_info_manager_, ir_info_manager_;
+   /** \brief Camera info manager objects. */
+   std::shared_ptr<camera_info_manager::CameraInfoManager> color_info_manager_,
+       ir_info_manager_;
 
-  OpenNI2VideoMode ir_video_mode_;
-  OpenNI2VideoMode color_video_mode_;
-  OpenNI2VideoMode depth_video_mode_;
+   OpenNI2VideoMode ir_video_mode_;
+   OpenNI2VideoMode color_video_mode_;
+   OpenNI2VideoMode depth_video_mode_;
 
-  std::string ir_frame_id_;
-  std::string color_frame_id_;
-  std::string depth_frame_id_ ;
+   std::string ir_frame_id_;
+   std::string color_frame_id_;
+   std::string depth_frame_id_;
 
-  std::string color_info_url_, ir_info_url_;
+   std::string color_info_url_, ir_info_url_;
 
-  bool color_depth_synchronization_;
-  bool depth_registration_;
+   bool color_depth_synchronization_;
+   bool depth_registration_;
 
-  std::map<std::string, OpenNI2VideoMode> video_modes_lookup_;
+   std::map<std::string, OpenNI2VideoMode> video_modes_lookup_;
 
-  // dynamic reconfigure config
-  double depth_ir_offset_x_;
-  double depth_ir_offset_y_;
-  int z_offset_mm_;
-  double z_scaling_;
+   // dynamic reconfigure config
+   double depth_ir_offset_x_;
+   double depth_ir_offset_y_;
+   int z_offset_mm_;
+   double z_scaling_;
 
-  double ir_time_offset_;
-  double color_time_offset_;
-  double depth_time_offset_;
+   double ir_time_offset_;
+   double color_time_offset_;
+   double depth_time_offset_;
 
-  int data_skip_;
+   int data_skip_;
 
-  int data_skip_ir_counter_;
-  int data_skip_color_counter_;
-  int data_skip_depth_counter_;
+   int data_skip_ir_counter_;
+   int data_skip_color_counter_;
+   int data_skip_depth_counter_;
 
-  bool auto_exposure_;
-  bool auto_white_balance_;
-  int exposure_;
+   bool auto_exposure_;
+   bool auto_white_balance_;
+   int exposure_;
 
-  bool ir_subscribers_;
-  bool color_subscribers_;
-  bool depth_subscribers_;
-  bool depth_raw_subscribers_;
-  bool projector_info_subscribers_;
+   bool ir_subscribers_;
+   bool color_subscribers_;
+   bool depth_subscribers_;
+   bool depth_raw_subscribers_;
+   bool projector_info_subscribers_;
 
-  bool use_device_time_;
-};
+   bool use_device_time_;
+   };
 
-}
+} // namespace openni2_wrapper
 
 #endif

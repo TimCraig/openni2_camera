@@ -32,63 +32,59 @@
 #include "openni2_camera/openni2_timer_filter.h"
 #include <algorithm>
 
-
 namespace openni2_wrapper
-{
+   {
 
-OpenNI2TimerFilter::OpenNI2TimerFilter(std::size_t filter_len):
-    filter_len_(filter_len)
-{
-}
-
-OpenNI2TimerFilter::~OpenNI2TimerFilter()
-{
-}
-
-void OpenNI2TimerFilter::addSample(double sample)
-{
-  buffer_.push_back(sample);
-  if (buffer_.size()>filter_len_)
-    buffer_.pop_front();
-}
-
-double OpenNI2TimerFilter::getMedian()
-{
-  if (buffer_.size()>0)
-  {
-    std::deque<double> sort_buffer = buffer_;
-
-    std::sort(sort_buffer.begin(), sort_buffer.end());
-
-    return sort_buffer[sort_buffer.size()/2];
-  } else
-    return 0.0;
-}
-
-double OpenNI2TimerFilter::getMovingAvg()
-{
-  if (buffer_.size() > 0)
-  {
-    double sum = 0;
-
-    std::deque<double>::const_iterator it = buffer_.begin();
-    std::deque<double>::const_iterator it_end = buffer_.end();
-
-    while (it != it_end)
-    {
-      sum += *(it++);
+OpenNI2TimerFilter::OpenNI2TimerFilter(std::size_t filter_len) : filter_len_(filter_len)
+   {
+      return;
     }
 
-    return sum / static_cast<double>(buffer_.size());
-  } else
-    return 0.0;
-}
+void OpenNI2TimerFilter::addSample(double sample)
+   {
+   buffer_.push_back(sample);
+   if (buffer_.size() > filter_len_)
+      buffer_.pop_front();
 
+      return;
+   }
 
-void OpenNI2TimerFilter::clear()
-{
-  buffer_.clear();
-}
+double OpenNI2TimerFilter::getMedian() const
+   {
+   double median = 0.0;
 
+   if (buffer_.size() > 0)
+      {
+      std::deque<double> sort_buffer = buffer_;
 
-} //namespace openni2_wrapper
+      std::sort(sort_buffer.begin(), sort_buffer.end());
+
+      median = sort_buffer[sort_buffer.size() / 2];
+      }
+
+      return (median);
+   }
+
+double OpenNI2TimerFilter::getMovingAvg() const
+   {
+   double avg = 0.0;
+
+   if (buffer_.size() > 0)
+      {
+      double sum = 0;
+
+      std::deque<double>::const_iterator it = buffer_.begin();
+      std::deque<double>::const_iterator it_end = buffer_.end();
+
+      while (it != it_end)
+         {
+         sum += *(it++);
+         }
+
+      avg = sum / static_cast<double>(buffer_.size());
+      }
+
+      return (avg);
+   }
+
+   } // namespace openni2_wrapper

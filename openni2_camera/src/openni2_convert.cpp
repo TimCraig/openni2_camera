@@ -37,64 +37,61 @@
 #include <string>
 
 namespace openni2_wrapper
-{
+   {
 
 const OpenNI2DeviceInfo openni2_convert(const openni::DeviceInfo* pInfo)
-{
-  if (!pInfo)
-    THROW_OPENNI_EXCEPTION("openni2_convert called with zero pointer\n");
+   {
+   if (!pInfo)
+      {
+      THROW_OPENNI_EXCEPTION("openni2_convert called with null pointer\n");
+      }
 
-  OpenNI2DeviceInfo output;
+   OpenNI2DeviceInfo output;
 
-  output.name_       = pInfo->getName();
-  output.uri_        = pInfo->getUri();
-  output.vendor_     = pInfo->getVendor();
-  output.product_id_ = pInfo->getUsbProductId();
-  output.vendor_id_  = pInfo->getUsbVendorId();
+   output.name_ = pInfo->getName();
+   output.uri_ = pInfo->getUri();
+   output.vendor_ = pInfo->getVendor();
+   output.product_id_ = pInfo->getUsbProductId();
+   output.vendor_id_ = pInfo->getUsbVendorId();
 
-  return output;
-}
-
+   return (output);
+   }
 
 const OpenNI2VideoMode openni2_convert(const openni::VideoMode& input)
-{
-  OpenNI2VideoMode output;
+   {
+   OpenNI2VideoMode output;
 
-  output.x_resolution_ = input.getResolutionX();
-  output.y_resolution_ = input.getResolutionY();
-  output.frame_rate_ = input.getFps();
-  output.pixel_format_ = static_cast<PixelFormat>(input.getPixelFormat());
+   output.x_resolution_ = input.getResolutionX();
+   output.y_resolution_ = input.getResolutionY();
+   output.frame_rate_ = input.getFps();
+   output.pixel_format_ = static_cast<PixelFormat>(input.getPixelFormat());
 
-  return output;
-}
+   return (output);
+   }
 
 const openni::VideoMode openni2_convert(const OpenNI2VideoMode& input)
-{
+   {
+   openni::VideoMode output;
 
-  openni::VideoMode output;
+   output.setResolution(input.x_resolution_, input.y_resolution_);
+   output.setFps(input.frame_rate_);
+   output.setPixelFormat(static_cast<openni::PixelFormat>(input.pixel_format_));
 
-  output.setResolution(input.x_resolution_, input.y_resolution_);
-  output.setFps(input.frame_rate_);
-  output.setPixelFormat(static_cast<openni::PixelFormat>(input.pixel_format_));
-
-  return output;
-}
-
+   return (output);
+   }
 
 const std::vector<OpenNI2VideoMode> openni2_convert(const openni::Array<openni::VideoMode>& input)
-{
-  std::vector<OpenNI2VideoMode> output;
+   {
+   std::vector<OpenNI2VideoMode> output;
 
-  int size = input.getSize();
+   int size = input.getSize();
 
-  output.reserve(size);
+   output.reserve(size);
 
-  for (int i=0; i<size; ++i)
-    output.push_back(openni2_convert(input[i]));
+   for (int i = 0; i < size; ++i)
+      output.push_back(openni2_convert(input[i]));
 
-  return output;
-}
+   return (output);
+   }
 
-}
-
-
+   }  // namespace openni2_wrapper

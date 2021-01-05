@@ -1,0 +1,10 @@
+/camera/depth/camera_info
+/camera/depth/image
+/camera/depth/image_raw
+/camera/ir/camera_info
+/camera/ir/image
+/camera/projector/camera_info
+/camera/rgb/camera_info
+/camera/rgb/image_raw
+/parameter_events
+/rosout

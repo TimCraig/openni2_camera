@@ -44,233 +44,247 @@
 #include "OpenNI.h"
 
 namespace openni2_wrapper
-{
+   {
 
 class OpenNI2DeviceInfoComparator
-{
-public:
-  bool operator()(const OpenNI2DeviceInfo& di1, const OpenNI2DeviceInfo& di2)
-  {
-    return (di1.uri_.compare(di2.uri_) < 0);
-  }
-};
+   {
+   public:
+   bool operator()(const OpenNI2DeviceInfo& di1, const OpenNI2DeviceInfo& di2)
+      {
+      return (di1.uri_.compare(di2.uri_) < 0);
+      }
+   };
 
-typedef std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator> DeviceSet;
+using DeviceSet = std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator>;
 
 class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
-                             public openni::OpenNI::DeviceDisconnectedListener,
-                             public openni::OpenNI::DeviceStateChangedListener
-{
-public:
-  OpenNI2DeviceListener() :
-      openni::OpenNI::DeviceConnectedListener(),
-      openni::OpenNI::DeviceDisconnectedListener(),
-      openni::OpenNI::DeviceStateChangedListener()
-  {
-    openni::OpenNI::addDeviceConnectedListener(this);
-    openni::OpenNI::addDeviceDisconnectedListener(this);
-    openni::OpenNI::addDeviceStateChangedListener(this);
+                              public openni::OpenNI::DeviceDisconnectedListener,
+                              public openni::OpenNI::DeviceStateChangedListener
+   {
+   public:
+   OpenNI2DeviceListener()
+      : openni::OpenNI::DeviceConnectedListener()
+      , openni::OpenNI::DeviceDisconnectedListener()
+      , openni::OpenNI::DeviceStateChangedListener()
+      {
+      openni::OpenNI::addDeviceConnectedListener(this);
+      openni::OpenNI::addDeviceDisconnectedListener(this);
+      openni::OpenNI::addDeviceStateChangedListener(this);
 
-    // get list of currently connected devices
-    openni::Array<openni::DeviceInfo> device_info_list;
-    openni::OpenNI::enumerateDevices(&device_info_list);
+      // get list of currently connected devices
+      openni::Array<openni::DeviceInfo> device_info_list;
+      openni::OpenNI::enumerateDevices(&device_info_list);
 
-    for (int i = 0; i < device_info_list.getSize(); ++i)
-    {
-      onDeviceConnected(&device_info_list[i]);
-    }
-  }
+      for (int i = 0; i < device_info_list.getSize(); ++i)
+         {
+         onDeviceConnected(&device_info_list[i]);
+         }
 
-  ~OpenNI2DeviceListener()
-  {
-    openni::OpenNI::removeDeviceConnectedListener(this);
-    openni::OpenNI::removeDeviceDisconnectedListener(this);
-    openni::OpenNI::removeDeviceStateChangedListener(this);
-  }
+      return;
+      }
 
-  virtual void onDeviceStateChanged(const openni::DeviceInfo* pInfo, openni::DeviceState state)
-  {
-    RCLCPP_INFO(rclcpp::get_logger("openni2"), "Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
+   ~OpenNI2DeviceListener()
+      {
+      openni::OpenNI::removeDeviceConnectedListener(this);
+      openni::OpenNI::removeDeviceDisconnectedListener(this);
+      openni::OpenNI::removeDeviceStateChangedListener(this);
 
-    switch (state)
-    {
-      case openni::DEVICE_STATE_OK:
-        onDeviceConnected(pInfo);
-        break;
-      case openni::DEVICE_STATE_ERROR:
-      case openni::DEVICE_STATE_NOT_READY:
-      case openni::DEVICE_STATE_EOF:
+      return;
+      }
+
+   virtual void onDeviceStateChanged(const openni::DeviceInfo* pInfo, openni::DeviceState state)
+      {
+      RCLCPP_INFO(rclcpp::get_logger("openni2"), "Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
+
+      switch (state)
+         {
+         case openni::DEVICE_STATE_OK:
+         onDeviceConnected(pInfo);
+         break;
+
+         case openni::DEVICE_STATE_ERROR:
+         case openni::DEVICE_STATE_NOT_READY:
+         case openni::DEVICE_STATE_EOF:
       default:
-        onDeviceDisconnected(pInfo);
-        break;
-    }
-  }
+         onDeviceDisconnected(pInfo);
+         break;
+         }
 
-  virtual void onDeviceConnected(const openni::DeviceInfo* pInfo)
-  {
-    boost::mutex::scoped_lock l(device_mutex_);
+      return;
+      }
 
-    const OpenNI2DeviceInfo device_info_wrapped = openni2_convert(pInfo);
+   virtual void onDeviceConnected(const openni::DeviceInfo* pInfo)
+      {
+      boost::mutex::scoped_lock l(device_mutex_);
 
-    RCLCPP_INFO(rclcpp::get_logger("openni2"), "Device \"%s\" found.", pInfo->getUri());
+      const OpenNI2DeviceInfo device_info_wrapped = openni2_convert(pInfo);
 
-    // make sure it does not exist in set before inserting
-    device_set_.erase(device_info_wrapped);
-    device_set_.insert(device_info_wrapped);
-  }
+      RCLCPP_INFO(rclcpp::get_logger("openni2"), "Device \"%s\" found.", pInfo->getUri());
 
+      // make sure it does not exist in set before inserting
+      device_set_.erase(device_info_wrapped);
+      device_set_.insert(device_info_wrapped);
 
-  virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
-  {
-    boost::mutex::scoped_lock l(device_mutex_);
+      return;
+      }
 
-    RCLCPP_WARN(rclcpp::get_logger("openni2"), "Device \"%s\" disconnected\n", pInfo->getUri());
+   virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
+      {
+      boost::mutex::scoped_lock l(device_mutex_);
 
-    const OpenNI2DeviceInfo device_info_wrapped = openni2_convert(pInfo);
-    device_set_.erase(device_info_wrapped);
-  }
+      RCLCPP_WARN(rclcpp::get_logger("openni2"), "Device \"%s\" disconnected\n", pInfo->getUri());
 
-  boost::shared_ptr<std::vector<std::string> > getConnectedDeviceURIs()
-  {
-    boost::mutex::scoped_lock l(device_mutex_);
+      const OpenNI2DeviceInfo device_info_wrapped = openni2_convert(pInfo);
+      device_set_.erase(device_info_wrapped);
 
-    boost::shared_ptr<std::vector<std::string> > result = boost::make_shared<std::vector<std::string> >();
+      return;
+      }
 
-    result->reserve(device_set_.size());
+   boost::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs()
+      {
+      boost::mutex::scoped_lock l(device_mutex_);
 
-    std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator>::const_iterator it;
-    std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator>::const_iterator it_end = device_set_.end();
+      boost::shared_ptr<std::vector<std::string>> result = boost::make_shared<std::vector<std::string>>();
 
-    for (it = device_set_.begin(); it != it_end; ++it)
-      result->push_back(it->uri_);
+      result->reserve(device_set_.size());
 
-    return result;
-  }
+      std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator>::const_iterator it;
+      std::set<OpenNI2DeviceInfo, OpenNI2DeviceInfoComparator>::const_iterator it_end = device_set_.end();
 
-  boost::shared_ptr<std::vector<OpenNI2DeviceInfo> > getConnectedDeviceInfos()
-  {
-    boost::mutex::scoped_lock l(device_mutex_);
+      for (it = device_set_.begin(); it != it_end; ++it)
+         result->push_back(it->uri_);
 
-    boost::shared_ptr<std::vector<OpenNI2DeviceInfo> > result = boost::make_shared<std::vector<OpenNI2DeviceInfo> >();
+      return (result);
+      }
 
-    result->reserve(device_set_.size());
+   boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos()
+      {
+      boost::mutex::scoped_lock l(device_mutex_);
 
-    DeviceSet::const_iterator it;
-    DeviceSet::const_iterator it_end = device_set_.end();
+      boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> result = boost::make_shared<std::vector<OpenNI2DeviceInfo>>();
 
-    for (it = device_set_.begin(); it != it_end; ++it)
-      result->push_back(*it);
+      result->reserve(device_set_.size());
 
-    return result;
-  }
+      DeviceSet::const_iterator it;
+      DeviceSet::const_iterator it_end = device_set_.end();
 
-  std::size_t getNumOfConnectedDevices()
-  {
-    boost::mutex::scoped_lock l(device_mutex_);
+      for (it = device_set_.begin(); it != it_end; ++it)
+      {
+         result->push_back(*it);
+      }
 
-    return device_set_.size();
-  }
+      return (result);
+      }
 
-  boost::mutex device_mutex_;
-  DeviceSet device_set_;
-};
+   std::size_t getNumOfConnectedDevices()
+      {
+      boost::mutex::scoped_lock l(device_mutex_);
+
+      return (device_set_.size());
+      }
+
+   boost::mutex device_mutex_;
+   DeviceSet device_set_;
+   };
 
 //////////////////////////////////////////////////////////////////////////
 
 boost::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::singelton_;
 
 OpenNI2DeviceManager::OpenNI2DeviceManager()
-{
-  openni::Status rc = openni::OpenNI::initialize();
-  if (rc != openni::STATUS_OK)
+   {
+   openni::Status rc = openni::OpenNI::initialize();
+   if (rc != openni::STATUS_OK)
       THROW_OPENNI_EXCEPTION("Initialize failed\n%s\n", openni::OpenNI::getExtendedError());
 
-  device_listener_ = boost::make_shared<OpenNI2DeviceListener>();
-}
+   device_listener_ = boost::make_shared<OpenNI2DeviceListener>();
 
-OpenNI2DeviceManager::~OpenNI2DeviceManager()
-{
-}
+   return;
+   }
 
 boost::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::getSingelton()
-{
-  if (singelton_.get()==0)
-    singelton_ = boost::make_shared<OpenNI2DeviceManager>();
+   {
+   if (singelton_.get() == 0)
+      singelton_ = boost::make_shared<OpenNI2DeviceManager>();
 
-  return singelton_;
-}
+   return (singelton_);
+   }
 
-boost::shared_ptr<std::vector<OpenNI2DeviceInfo> > OpenNI2DeviceManager::getConnectedDeviceInfos() const
-{
-return device_listener_->getConnectedDeviceInfos();
-}
+boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> OpenNI2DeviceManager::getConnectedDeviceInfos() const
+   {
+   return (device_listener_->getConnectedDeviceInfos());
+   }
 
-boost::shared_ptr<std::vector<std::string> > OpenNI2DeviceManager::getConnectedDeviceURIs() const
-{
-  return device_listener_->getConnectedDeviceURIs();
-}
+boost::shared_ptr<std::vector<std::string>> OpenNI2DeviceManager::getConnectedDeviceURIs() const
+   {
+   return (device_listener_->getConnectedDeviceURIs());
+   }
 
 std::size_t OpenNI2DeviceManager::getNumOfConnectedDevices() const
-{
-  return device_listener_->getNumOfConnectedDevices();
-}
+   {
+   return (device_listener_->getNumOfConnectedDevices());
+   }
 
 std::string OpenNI2DeviceManager::getSerial(const std::string& Uri) const
-{
-  openni::Device openni_device;
-  std::string ret;
+   {
+   openni::Device openni_device;
+   std::string ret;
 
-  // we need to open the device to query the serial number
-  if (Uri.length() > 0 && openni_device.open(Uri.c_str()) == openni::STATUS_OK)
-  {
-    int serial_len = 100;
-    char serial[serial_len];
+   // we need to open the device to query the serial number
+   if (Uri.length() > 0 && openni_device.open(Uri.c_str()) == openni::STATUS_OK)
+      {
+      int serial_len = 100;
+      char serial[serial_len];
 
-    openni::Status rc = openni_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, serial, &serial_len);
-    if (rc == openni::STATUS_OK)
-      ret = serial;
-    else
-    {
-      THROW_OPENNI_EXCEPTION("Serial number query failed: %s", openni::OpenNI::getExtendedError());
-    }
-    // close the device again
-    openni_device.close();
-  }
-  else
-  {
-    THROW_OPENNI_EXCEPTION("Device open failed: %s", openni::OpenNI::getExtendedError());
-  }
-  return ret;
-}
+      openni::Status rc = openni_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, serial, &serial_len);
+      if (rc == openni::STATUS_OK)
+         ret = serial;
+      else
+         {
+         THROW_OPENNI_EXCEPTION("Serial number query failed: %s", openni::OpenNI::getExtendedError());
+         }
+      // close the device again
+      openni_device.close();
+      }
+   else
+      {
+      THROW_OPENNI_EXCEPTION("Device open failed: %s", openni::OpenNI::getExtendedError());
+      }
+
+   return (ret);
+   }
 
 boost::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getAnyDevice(rclcpp::Node* node)
-{
-  return boost::make_shared<OpenNI2Device>("", node);
-}
+   {
+   return (boost::make_shared<OpenNI2Device>("", node));
+   }
+
 boost::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getDevice(const std::string& device_URI, rclcpp::Node* node)
-{
-  return boost::make_shared<OpenNI2Device>(device_URI, node);
-}
+   {
+   return (boost::make_shared<OpenNI2Device>(device_URI, node));
+   }
 
+std::ostream& operator<<(std::ostream& stream, const OpenNI2DeviceManager& device_manager)
+   {
+   boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> device_info = device_manager.getConnectedDeviceInfos();
+#if 0
+   std::vector<OpenNI2DeviceInfo>::const_iterator it;
+   std::vector<OpenNI2DeviceInfo>::const_iterator it_end = device_info->end();
+#endif
+   for (const auto& dev : *device_info)
+      {
+      stream << "Uri: " << dev.uri_ << " (Vendor: " << dev.vendor_ << ", Name: " << dev.name_
+         << ", Vendor ID: " << dev.vendor_id_ << ", Product ID: " << dev.product_id_ << ")" << std::endl;
+      }
 
-std::ostream& operator << (std::ostream& stream, const OpenNI2DeviceManager& device_manager) {
+#if 0
+   for (it = device_info->begin(); it != it_end; ++it)
+      {
+      stream << "Uri: " << it->uri_ << " (Vendor: " << it->vendor_ << ", Name: " << it->name_
+             << ", Vendor ID: " << it->vendor_id_ << ", Product ID: " << it->product_id_ << ")" << std::endl;
+      }
+#endif
+   return (stream);
+   }
 
-  boost::shared_ptr<std::vector<OpenNI2DeviceInfo> > device_info = device_manager.getConnectedDeviceInfos();
-
-  std::vector<OpenNI2DeviceInfo>::const_iterator it;
-  std::vector<OpenNI2DeviceInfo>::const_iterator it_end = device_info->end();
-
-  for (it = device_info->begin(); it != it_end; ++it)
-  {
-    stream << "Uri: " << it->uri_ << " (Vendor: " << it->vendor_ <<
-                                     ", Name: " << it->name_ <<
-                                     ", Vendor ID: " << it->vendor_id_ <<
-                                     ", Product ID: " << it->product_id_ <<
-                                      ")" << std::endl;
-  }
-
-  return stream;
-}
-
-
-} //namespace openni2_wrapper
+   } // namespace openni2_wrapper

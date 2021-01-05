@@ -57,7 +57,7 @@ add_library(openni2_camera SHARED
 )
 target_link_libraries(openni2_camera
   openni2_wrapper
-  ${Boost_LIBRARIE}
+  ${Boost_LIBRARIES}
 )
 ament_target_dependencies(openni2_camera
   camera_info_manager

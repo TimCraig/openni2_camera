@@ -34,32 +34,32 @@
  * serial number.
  */
 
-#include <iostream>
 #include "openni2_camera/openni2_device_manager.h"
 #include "openni2_camera/openni2_exception.h"
+#include <iostream>
 
-using openni2_wrapper::OpenNI2DeviceManager;
-using openni2_wrapper::OpenNI2DeviceInfo;
-using openni2_wrapper::OpenNI2Exception;
+using OpenNI2DeviceInfo = openni2_wrapper::OpenNI2DeviceInfo;
+using OpenNI2DeviceManager = openni2_wrapper::OpenNI2DeviceManager;
+using OpenNI2Exception = openni2_wrapper::OpenNI2Exception;
 
 int main(int arc, char** argv)
 {
-  openni2_wrapper::OpenNI2DeviceManager manager;
-  boost::shared_ptr<std::vector<openni2_wrapper::OpenNI2DeviceInfo> > device_infos = manager.getConnectedDeviceInfos();
-  std::cout << "Found " << device_infos->size() << " devices:" << std::endl << std::endl;
-  for (size_t i = 0; i < device_infos->size(); ++i)
-  {
-    std::cout << "Device #" << i << ":" << std::endl;
-    std::cout << device_infos->at(i) << std::endl;
-    try {
-      std::string serial = manager.getSerial(device_infos->at(i).uri_);
-      std::cout << "Serial number: " << serial << std::endl;
-    }
-    catch (const OpenNI2Exception& exception)
-    {
-      std::cerr << "Could not retrieve serial number: " << exception.what() << std::endl;
-    }
-  }
-  return 0;
+   OpenNI2DeviceManager manager;
+   boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> device_infos = manager.getConnectedDeviceInfos();
+   std::cout << "Found " << device_infos->size() << " devices:" << std::endl << std::endl;
+   for (size_t i = 0; i < device_infos->size(); ++i)
+      {
+         std::cout << "Device #" << i << ":" << std::endl;
+         std::cout << device_infos->at(i) << std::endl;
+         try
+            {
+               std::string serial = manager.getSerial(device_infos->at(i).uri_);
+               std::cout << "Serial number: " << serial << std::endl;
+            }
+         catch (const OpenNI2Exception& exception)
+            {
+               std::cerr << "Could not retrieve serial number: " << exception.what() << std::endl;
+            }
+      }
+   return 0;
 }
-

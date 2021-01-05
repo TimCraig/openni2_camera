@@ -29,27 +29,30 @@
  *      Author: Julius Kammerl (jkammerl@willowgarage.com)
  */
 
+#pragma once
+
 #ifndef OPENNI2_DEVICE_INFO_H_
 #define OPENNI2_DEVICE_INFO_H_
 
 #include <ostream>
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace openni2_wrapper
 {
 
 struct OpenNI2DeviceInfo
-{
-  std::string uri_;
-  std::string vendor_;
-  std::string name_;
-  uint16_t vendor_id_;
-  uint16_t product_id_;
-};
+   {
+   std::string uri_;
+   std::string vendor_;
+   std::string name_;
+   uint16_t vendor_id_;
+   uint16_t product_id_;
+   };
 
-std::ostream& operator << (std::ostream& stream, const OpenNI2DeviceInfo& device_info);
+std::ostream& operator<<(std::ostream& stream,
+                         const OpenNI2DeviceInfo& device_info);
 
-}
+} // namespace openni2_wrapper
 
 #endif /* DRIVER_H_ */
