@@ -39,8 +39,7 @@
 #include <cstdint>
 
 namespace openni2_wrapper
-{
-
+   {
 struct OpenNI2DeviceInfo
    {
    std::string uri_;
@@ -50,9 +49,8 @@ struct OpenNI2DeviceInfo
    uint16_t product_id_;
    };
 
-std::ostream& operator<<(std::ostream& stream,
-                         const OpenNI2DeviceInfo& device_info);
+std::ostream& operator<<(std::ostream& stream, const OpenNI2DeviceInfo& device_info);
 
-} // namespace openni2_wrapper
+   }  // namespace openni2_wrapper
 
 #endif /* DRIVER_H_ */

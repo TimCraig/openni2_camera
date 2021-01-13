@@ -32,13 +32,11 @@
 #include "openni2_camera/openni2_convert.h"
 #include "openni2_camera/openni2_exception.h"
 
-#include <boost/make_shared.hpp>
-
+#include <memory>
 #include <string>
 
 namespace openni2_wrapper
    {
-
 const OpenNI2DeviceInfo openni2_convert(const openni::DeviceInfo* pInfo)
    {
    if (!pInfo)

@@ -49,9 +49,13 @@ int main(int argc, char** argv)
       {
       fprintf(stderr, "Usage: usb_reset device-filename\n");
       fprintf(stderr, "\n");
-      fprintf(stderr, "For instance if lsusb shows 'Bus 002 Device 013' for your camera\n");
+      fprintf(stderr,
+              "For instance if lsusb shows 'Bus 002 "
+              "Device 013' for your camera\n");
       fprintf(stderr, "You would call with:\n");
-      fprintf(stderr, "  ros2 run openni2_camera usb_reset /dev/bus/usb/002/013\n");
+      fprintf(stderr,
+              "  ros2 run openni2_camera usb_reset "
+              "/dev/bus/usb/002/013\n");
       return 1;
       }
 

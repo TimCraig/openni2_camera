@@ -40,48 +40,48 @@
 #include <sensor_msgs/msg/image.hpp>
 
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
+#include <memory>
 #include <vector>
 
 #include "OpenNI.h"
 
 namespace openni2_wrapper
-{
+   {
 
 class OpenNI2TimerFilter;
 using FrameCallbackFunction = boost::function<void(sensor_msgs::msg::Image::SharedPtr image)>;
 
 class OpenNI2FrameListener : public openni::VideoStream::NewFrameListener
-{
-public:
-  OpenNI2FrameListener(rclcpp::Node* node);
+   {
+   public:
+   OpenNI2FrameListener(rclcpp::Node* node);
 
-  virtual ~OpenNI2FrameListener() = default;
+   virtual ~OpenNI2FrameListener() = default;
 
-  void onNewFrame(openni::VideoStream& stream);
+   void onNewFrame(openni::VideoStream& stream);
 
-  void setCallback(FrameCallbackFunction& callback)
-  {
-    callback_ = callback;
+   void setCallback(FrameCallbackFunction& callback)
+      {
+      callback_ = callback;
 
-    return;
-  }
+      return;
+      }
 
-  void setUseDeviceTimer(bool enable);
+   void setUseDeviceTimer(bool enable);
 
-private:
-  openni::VideoFrameRef m_frame;
+   private:
+   openni::VideoFrameRef m_frame;
 
-  FrameCallbackFunction callback_;
+   FrameCallbackFunction callback_;
 
-  bool user_device_timer_;
-  boost::shared_ptr<OpenNI2TimerFilter> timer_filter_;
+   bool user_device_timer_;
+   std::shared_ptr<OpenNI2TimerFilter> timer_filter_;
 
-  rclcpp::Node* node_;  // needed for time
-  rclcpp::Time prev_time_stamp_;
-};
+   rclcpp::Node* node_;  // needed for time
+   rclcpp::Time prev_time_stamp_;
+   };
 
-} // end of namespace openni2_wrapper
+   }  // end of namespace openni2_wrapper
 
 #endif

@@ -40,42 +40,40 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <vector>
-#include <string>
 #include <ostream>
+#include <string>
+#include <vector>
 
 namespace openni2_wrapper
-{
-
+   {
 class OpenNI2DeviceListener;
 class OpenNI2Device;
 
 class OpenNI2DeviceManager
-{
-public:
-  OpenNI2DeviceManager();
-  virtual ~OpenNI2DeviceManager() = default;
+   {
+   public:
+   OpenNI2DeviceManager();
+   virtual ~OpenNI2DeviceManager() = default;
 
-  static boost::shared_ptr<OpenNI2DeviceManager> getSingelton();
+   static std::shared_ptr<OpenNI2DeviceManager> getSingelton();
 
-  boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos() const;
-  boost::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs() const;
-  std::size_t getNumOfConnectedDevices() const;
+   std::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos() const;
+   std::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs() const;
+   std::size_t getNumOfConnectedDevices() const;
 
-  boost::shared_ptr<OpenNI2Device> getAnyDevice(rclcpp::Node* node);
-  boost::shared_ptr<OpenNI2Device> getDevice(const std::string& device_URI, rclcpp::Node* node);
+   std::shared_ptr<OpenNI2Device> getAnyDevice(rclcpp::Node* node);
+   std::shared_ptr<OpenNI2Device> getDevice(const std::string& device_URI, rclcpp::Node* node);
 
-  std::string getSerial(const std::string& device_URI) const;
+   std::string getSerial(const std::string& device_URI) const;
 
-protected:
-  boost::shared_ptr<OpenNI2DeviceListener> device_listener_;
+   protected:
+   std::shared_ptr<OpenNI2DeviceListener> device_listener_;
 
-  static boost::shared_ptr<OpenNI2DeviceManager> singelton_;
-};
+   static std::shared_ptr<OpenNI2DeviceManager> singelton_;
+   };
 
+std::ostream& operator<<(std::ostream& stream, const OpenNI2DeviceManager& device_manager);
 
-std::ostream& operator <<(std::ostream& stream, const OpenNI2DeviceManager& device_manager);
-
-}  // end of namespace openni2_wrappe
+   }  // namespace openni2_wrapper
 
 #endif

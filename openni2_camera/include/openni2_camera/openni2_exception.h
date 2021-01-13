@@ -49,11 +49,11 @@
 #define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 
-#define THROW_OPENNI_EXCEPTION(format, ...)                                    \
+#define THROW_OPENNI_EXCEPTION(format, ...) \
    throwOpenNIException(__PRETTY_FUNCTION__, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 namespace openni2_wrapper
-{
+   {
 /**
  * @brief General exception class
  * @author Suat Gedikli
@@ -61,16 +61,15 @@ namespace openni2_wrapper
  */
 class OpenNI2Exception : public std::exception
    {
- public:
-   OpenNI2Exception(const std::string& function_name,
-                    const std::string& file_name, unsigned line_number,
+   public:
+   OpenNI2Exception(const std::string& function_name, const std::string& file_name, unsigned line_number,
                     const std::string& message);
 
    virtual ~OpenNI2Exception() = default;
 
    OpenNI2Exception& operator=(const OpenNI2Exception& exception)
-     {
-     message_ = exception.message_;
+      {
+      message_ = exception.message_;
 
       return (*this);
       }
@@ -78,21 +77,21 @@ class OpenNI2Exception : public std::exception
    virtual const char* what() const noexcept override;
 
    const std::string& getFunctionName() const
-    {
-    return (function_name_);
-    }
+      {
+      return (function_name_);
+      }
 
-  const std::string& getFileName() const
-    {
-    return (file_name_);
-    }
+   const std::string& getFileName() const
+      {
+      return (file_name_);
+      }
 
    unsigned getLineNumber() const
-    {
+      {
       return (line_number_);
       }
 
- protected:
+   protected:
    std::string function_name_;
    std::string file_name_;
    unsigned line_number_;
@@ -100,8 +99,7 @@ class OpenNI2Exception : public std::exception
    std::string message_long_;
    };
 
-inline void throwOpenNIException(const char* function, const char* file,
-                                 unsigned line, const char* format, ...)
+inline void throwOpenNIException(const char* function, const char* file, unsigned line, const char* format, ...)
    {
    static char msg[1024];
    va_list args;
@@ -113,6 +111,6 @@ inline void throwOpenNIException(const char* function, const char* file,
    return;
    }
 
-} // namespace openni2_wrapper
+   }  // namespace openni2_wrapper
 
 #endif

@@ -36,9 +36,9 @@
 
 #include "OpenNI.h"
 
-#include "openni2_camera/openni2_video_mode.h"
 #include "openni2_camera/openni2_exception.h"
 #include "openni2_camera/openni2_frame_listener.h"
+#include "openni2_camera/openni2_video_mode.h"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -61,7 +61,6 @@ class SensorInfo;
 
 namespace openni2_wrapper
    {
-
 class OpenNI2Device
    {
    public:
@@ -185,7 +184,6 @@ class OpenNI2Device
       return;
       }
 
-
    float getIRFocalLength(int output_y_resolution) const;
    float getColorFocalLength(int output_y_resolution) const;
    float getDepthFocalLength(int output_y_resolution) const;
@@ -202,23 +200,22 @@ class OpenNI2Device
    void setUseDeviceTimer(bool enable);
 
    protected:
-
    void shutdown();
 
-   boost::shared_ptr<openni::VideoStream> getIRVideoStream() const;
-   boost::shared_ptr<openni::VideoStream> getColorVideoStream() const;
-   boost::shared_ptr<openni::VideoStream> getDepthVideoStream() const;
+   std::shared_ptr<openni::VideoStream> getIRVideoStream() const;
+   std::shared_ptr<openni::VideoStream> getColorVideoStream() const;
+   std::shared_ptr<openni::VideoStream> getDepthVideoStream() const;
 
-   boost::shared_ptr<openni::Device> openni_device_;
-   boost::shared_ptr<openni::DeviceInfo> device_info_;
+   std::shared_ptr<openni::Device> openni_device_;
+   std::shared_ptr<openni::DeviceInfo> device_info_;
 
-   boost::shared_ptr<OpenNI2FrameListener> ir_frame_listener;
-   boost::shared_ptr<OpenNI2FrameListener> color_frame_listener;
-   boost::shared_ptr<OpenNI2FrameListener> depth_frame_listener;
+   std::shared_ptr<OpenNI2FrameListener> ir_frame_listener;
+   std::shared_ptr<OpenNI2FrameListener> color_frame_listener;
+   std::shared_ptr<OpenNI2FrameListener> depth_frame_listener;
 
-   mutable boost::shared_ptr<openni::VideoStream> ir_video_stream_;
-   mutable boost::shared_ptr<openni::VideoStream> color_video_stream_;
-   mutable boost::shared_ptr<openni::VideoStream> depth_video_stream_;
+   mutable std::shared_ptr<openni::VideoStream> ir_video_stream_;
+   mutable std::shared_ptr<openni::VideoStream> color_video_stream_;
+   mutable std::shared_ptr<openni::VideoStream> depth_video_stream_;
 
    mutable std::vector<OpenNI2VideoMode> ir_video_modes_;
    mutable std::vector<OpenNI2VideoMode> color_video_modes_;

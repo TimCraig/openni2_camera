@@ -34,7 +34,7 @@
 #include "openni2_camera/openni2_device.h"
 #include "openni2_camera/openni2_exception.h"
 
-#include <boost/make_shared.hpp>
+//#include <boost/make_shared.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -45,7 +45,6 @@
 
 namespace openni2_wrapper
    {
-
 class OpenNI2DeviceInfoComparator
    {
    public:
@@ -63,9 +62,9 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
    {
    public:
    OpenNI2DeviceListener()
-      : openni::OpenNI::DeviceConnectedListener()
-      , openni::OpenNI::DeviceDisconnectedListener()
-      , openni::OpenNI::DeviceStateChangedListener()
+         : openni::OpenNI::DeviceConnectedListener(),
+           openni::OpenNI::DeviceDisconnectedListener(),
+           openni::OpenNI::DeviceStateChangedListener()
       {
       openni::OpenNI::addDeviceConnectedListener(this);
       openni::OpenNI::addDeviceDisconnectedListener(this);
@@ -140,11 +139,11 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
       return;
       }
 
-   boost::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs()
+   std::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs()
       {
       boost::mutex::scoped_lock l(device_mutex_);
 
-      boost::shared_ptr<std::vector<std::string>> result = boost::make_shared<std::vector<std::string>>();
+      std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
 
       result->reserve(device_set_.size());
 
@@ -157,11 +156,11 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
       return (result);
       }
 
-   boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos()
+   std::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos()
       {
       boost::mutex::scoped_lock l(device_mutex_);
 
-      boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> result = boost::make_shared<std::vector<OpenNI2DeviceInfo>>();
+      std::shared_ptr<std::vector<OpenNI2DeviceInfo>> result = std::make_shared<std::vector<OpenNI2DeviceInfo>>();
 
       result->reserve(device_set_.size());
 
@@ -169,9 +168,9 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
       DeviceSet::const_iterator it_end = device_set_.end();
 
       for (it = device_set_.begin(); it != it_end; ++it)
-      {
+         {
          result->push_back(*it);
-      }
+         }
 
       return (result);
       }
@@ -189,7 +188,7 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
 //////////////////////////////////////////////////////////////////////////
 
-boost::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::singelton_;
+std::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::singelton_;
 
 OpenNI2DeviceManager::OpenNI2DeviceManager()
    {
@@ -197,25 +196,25 @@ OpenNI2DeviceManager::OpenNI2DeviceManager()
    if (rc != openni::STATUS_OK)
       THROW_OPENNI_EXCEPTION("Initialize failed\n%s\n", openni::OpenNI::getExtendedError());
 
-   device_listener_ = boost::make_shared<OpenNI2DeviceListener>();
+   device_listener_ = std::make_shared<OpenNI2DeviceListener>();
 
    return;
    }
 
-boost::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::getSingelton()
+std::shared_ptr<OpenNI2DeviceManager> OpenNI2DeviceManager::getSingelton()
    {
    if (singelton_.get() == 0)
-      singelton_ = boost::make_shared<OpenNI2DeviceManager>();
+      singelton_ = std::make_shared<OpenNI2DeviceManager>();
 
    return (singelton_);
    }
 
-boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> OpenNI2DeviceManager::getConnectedDeviceInfos() const
+std::shared_ptr<std::vector<OpenNI2DeviceInfo>> OpenNI2DeviceManager::getConnectedDeviceInfos() const
    {
    return (device_listener_->getConnectedDeviceInfos());
    }
 
-boost::shared_ptr<std::vector<std::string>> OpenNI2DeviceManager::getConnectedDeviceURIs() const
+std::shared_ptr<std::vector<std::string>> OpenNI2DeviceManager::getConnectedDeviceURIs() const
    {
    return (device_listener_->getConnectedDeviceURIs());
    }
@@ -254,37 +253,27 @@ std::string OpenNI2DeviceManager::getSerial(const std::string& Uri) const
    return (ret);
    }
 
-boost::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getAnyDevice(rclcpp::Node* node)
+std::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getAnyDevice(rclcpp::Node* node)
    {
-   return (boost::make_shared<OpenNI2Device>("", node));
+   return (std::make_shared<OpenNI2Device>("", node));
    }
 
-boost::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getDevice(const std::string& device_URI, rclcpp::Node* node)
+std::shared_ptr<OpenNI2Device> OpenNI2DeviceManager::getDevice(const std::string& device_URI, rclcpp::Node* node)
    {
-   return (boost::make_shared<OpenNI2Device>(device_URI, node));
+   return (std::make_shared<OpenNI2Device>(device_URI, node));
    }
 
 std::ostream& operator<<(std::ostream& stream, const OpenNI2DeviceManager& device_manager)
    {
-   boost::shared_ptr<std::vector<OpenNI2DeviceInfo>> device_info = device_manager.getConnectedDeviceInfos();
-#if 0
-   std::vector<OpenNI2DeviceInfo>::const_iterator it;
-   std::vector<OpenNI2DeviceInfo>::const_iterator it_end = device_info->end();
-#endif
+   std::shared_ptr<std::vector<OpenNI2DeviceInfo>> device_info = device_manager.getConnectedDeviceInfos();
+
    for (const auto& dev : *device_info)
       {
       stream << "Uri: " << dev.uri_ << " (Vendor: " << dev.vendor_ << ", Name: " << dev.name_
-         << ", Vendor ID: " << dev.vendor_id_ << ", Product ID: " << dev.product_id_ << ")" << std::endl;
+             << ", Vendor ID: " << dev.vendor_id_ << ", Product ID: " << dev.product_id_ << ")" << std::endl;
       }
 
-#if 0
-   for (it = device_info->begin(); it != it_end; ++it)
-      {
-      stream << "Uri: " << it->uri_ << " (Vendor: " << it->vendor_ << ", Name: " << it->name_
-             << ", Vendor ID: " << it->vendor_id_ << ", Product ID: " << it->product_id_ << ")" << std::endl;
-      }
-#endif
    return (stream);
    }
 
-   } // namespace openni2_wrapper
+   }  // namespace openni2_wrapper

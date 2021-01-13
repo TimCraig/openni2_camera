@@ -42,8 +42,7 @@
 #include <vector>
 
 namespace openni2_wrapper
-{
-
+   {
 const OpenNI2DeviceInfo openni2_convert(const openni::DeviceInfo* pInfo);
 
 const OpenNI2VideoMode openni2_convert(const openni::VideoMode& input);
@@ -51,6 +50,6 @@ const openni::VideoMode openni2_convert(const OpenNI2VideoMode& input);
 
 const std::vector<OpenNI2VideoMode> openni2_convert(const openni::Array<openni::VideoMode>& input);
 
-} // end of namespace openni2_wrapper
+   }  // end of namespace openni2_wrapper
 
 #endif

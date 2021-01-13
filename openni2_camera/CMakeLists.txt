@@ -49,8 +49,8 @@ ament_target_dependencies(openni2_wrapper
   rclcpp
 )
 
-#add_executable(test_wrapper test/test_wrapper.cpp)
-#target_link_libraries(test_wrapper openni2_wrapper ${Boost_LIBRARIES})
+add_executable(openni2_subscriber test/openni2_subscriber.cpp)
+target_link_libraries(openni2_subscriber openni2_wrapper ${Boost_LIBRARIES})
 
 add_library(openni2_camera SHARED
   src/openni2_driver.cpp

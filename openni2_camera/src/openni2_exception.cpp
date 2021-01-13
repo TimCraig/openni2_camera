@@ -40,10 +40,9 @@
 
 namespace openni2_wrapper
    {
-
-OpenNI2Exception::OpenNI2Exception(
-      const std::string& function_name, const std::string& file_name, unsigned line_number, const std::string& message)
-   : function_name_(function_name), file_name_(file_name), line_number_(line_number), message_(message)
+OpenNI2Exception::OpenNI2Exception(const std::string& function_name, const std::string& file_name, unsigned line_number,
+                                   const std::string& message)
+      : function_name_(function_name), file_name_(file_name), line_number_(line_number), message_(message)
    {
    std::stringstream sstream;
    sstream << function_name_ << " @ " << file_name_ << " @ " << line_number_ << " : " << message_;
@@ -52,9 +51,9 @@ OpenNI2Exception::OpenNI2Exception(
    return;
    }
 
-   const char* OpenNI2Exception::what() const noexcept
-    {
-    return (message_long_.c_str());
-    }
+const char* OpenNI2Exception::what() const noexcept
+   {
+   return (message_long_.c_str());
+   }
 
-   } // namespace openni2_wrapper
+   }  // namespace openni2_wrapper

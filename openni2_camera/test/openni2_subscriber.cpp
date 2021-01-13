@@ -15,31 +15,33 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
+#include <sensor_msgs/image_encodings.hpp>
+#include <sensor_msgs/msg/image.hpp>
+
 using std::placeholders::_1;
 
-class MinimalSubscriber : public rclcpp::Node
+class Openni2Subscriber : public rclcpp::Node
 {
 public:
-  MinimalSubscriber()
-  : Node("minimal_subscriber")
+  Openni2Subscriber() : Node("openni2_subscriber")
   {
-    subscription_ = this->create_subscription<std_msgs::msg::String>(
-      "topic", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));
+    subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
+      "/camera/depth/image", 10, std::bind(&Openni2Subscriber::topic_callback, this, _1));
   }
 
 private:
-  void topic_callback(const std_msgs::msg::String::SharedPtr msg) const
-  {
-    RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
-  }
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+  void topic_callback(const sensor_msgs::msg::Image::SharedPtr image) const
+    {
+   // RCLCPP_INFO(get_logger(), "Received Image (" << image->width << "," << image->height << ")");
+    }
+
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
 };
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MinimalSubscriber>());
+  rclcpp::spin(std::make_shared<Openni2Subscriber>());
   rclcpp::shutdown();
   return 0;
 }

@@ -33,10 +33,9 @@
 
 namespace openni2_wrapper
    {
-
 std::ostream& operator<<(std::ostream& stream, const OpenNI2VideoMode& video_mode)
    {
-   stream << "Resolution: " << (int) video_mode.x_resolution_ << "x" << (int) video_mode.y_resolution_ << "@"
+   stream << "Resolution: " << (int)video_mode.x_resolution_ << "x" << (int)video_mode.y_resolution_ << "@"
           << video_mode.frame_rate_ << "Hz Format: ";
 
    switch (video_mode.pixel_format_)
@@ -86,10 +85,10 @@ std::ostream& operator<<(std::ostream& stream, const OpenNI2VideoMode& video_mod
 
 bool operator==(const OpenNI2VideoMode& video_mode_a, const OpenNI2VideoMode& video_mode_b)
    {
-   return (video_mode_a.x_resolution_ == video_mode_b.x_resolution_)
-         && (video_mode_a.y_resolution_ == video_mode_b.y_resolution_)
-         && (video_mode_a.frame_rate_ == video_mode_b.frame_rate_)
-         && (video_mode_a.pixel_format_ == video_mode_b.pixel_format_);
+   return (video_mode_a.x_resolution_ == video_mode_b.x_resolution_) &&
+          (video_mode_a.y_resolution_ == video_mode_b.y_resolution_) &&
+          (video_mode_a.frame_rate_ == video_mode_b.frame_rate_) &&
+          (video_mode_a.pixel_format_ == video_mode_b.pixel_format_);
    }
 
-   } // namespace openni2_wrapper
+   }  // namespace openni2_wrapper

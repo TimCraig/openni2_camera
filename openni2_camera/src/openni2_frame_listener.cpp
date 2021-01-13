@@ -43,12 +43,14 @@ constexpr std::size_t TIME_FILTER_LENGTH = 15;
 
 namespace openni2_wrapper
    {
-
 OpenNI2FrameListener::OpenNI2FrameListener(rclcpp::Node* node)
-   : callback_(0), user_device_timer_(false), timer_filter_(new OpenNI2TimerFilter(TIME_FILTER_LENGTH)), node_(node),
-     prev_time_stamp_(node_->now())
+      : callback_(0),
+        user_device_timer_(false),
+        timer_filter_(new OpenNI2TimerFilter(TIME_FILTER_LENGTH)),
+        node_(node),
+        prev_time_stamp_(node_->now())
    {
-      return;
+   return;
    }
 
 void OpenNI2FrameListener::setUseDeviceTimer(bool enable)
@@ -76,7 +78,7 @@ void OpenNI2FrameListener::onNewFrame(openni::VideoStream& stream)
          image->header.stamp = ros_now;
 
          RCLCPP_DEBUG(rclcpp::get_logger("openni2"), "Time interval between frames: %.4f ms",
-               (float)((ros_now - prev_time_stamp_).nanoseconds() / 1e6));
+                      (float)((ros_now - prev_time_stamp_).nanoseconds() / 1e6));
 
          prev_time_stamp_ = ros_now;
          }
@@ -104,7 +106,7 @@ void OpenNI2FrameListener::onNewFrame(openni::VideoStream& stream)
          image->header.stamp = corrected_timestamp;
 
          RCLCPP_DEBUG(rclcpp::get_logger("openni2"), "Time interval between frames: %.4f ms",
-               (float)((corrected_timestamp - prev_time_stamp_).nanoseconds() / 1e6));
+                      (float)((corrected_timestamp - prev_time_stamp_).nanoseconds() / 1e6));
 
          prev_time_stamp_ = corrected_timestamp;
          }
@@ -172,7 +174,7 @@ void OpenNI2FrameListener::onNewFrame(openni::VideoStream& stream)
       callback_(image);
       }
 
-      return;
+   return;
    }
 
-   } // namespace openni2_wrapper
+   }  // namespace openni2_wrapper

@@ -39,32 +39,30 @@
 #include "OpenNI.h"
 
 namespace openni2_wrapper
-{
-
+   {
 class OpenNI2TimerFilter
-  {
-  public:
-    explicit OpenNI2TimerFilter(std::size_t filter_len);
-    virtual ~OpenNI2TimerFilter() = default;
+   {
+   public:
+   explicit OpenNI2TimerFilter(std::size_t filter_len);
+   virtual ~OpenNI2TimerFilter() = default;
 
-    void addSample(double sample);
+   void addSample(double sample);
 
-    double getMedian() const;
-    double getMovingAvg() const;
+   double getMedian() const;
+   double getMovingAvg() const;
 
-    void clear()
+   void clear()
       {
       buffer_.clear();
       return;
       }
 
+   private:
+   std::size_t filter_len_;
 
-  private:
-    std::size_t filter_len_;
+   std::deque<double> buffer_;
+   };
 
-    std::deque<double> buffer_;
-  };
-
-} // end of namespace openni2_wrapper
+   }  // end of namespace openni2_wrapper
 
 #endif

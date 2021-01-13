@@ -34,11 +34,10 @@
 
 namespace openni2_wrapper
    {
-
 OpenNI2TimerFilter::OpenNI2TimerFilter(std::size_t filter_len) : filter_len_(filter_len)
    {
-      return;
-    }
+   return;
+   }
 
 void OpenNI2TimerFilter::addSample(double sample)
    {
@@ -46,7 +45,7 @@ void OpenNI2TimerFilter::addSample(double sample)
    if (buffer_.size() > filter_len_)
       buffer_.pop_front();
 
-      return;
+   return;
    }
 
 double OpenNI2TimerFilter::getMedian() const
@@ -62,7 +61,7 @@ double OpenNI2TimerFilter::getMedian() const
       median = sort_buffer[sort_buffer.size() / 2];
       }
 
-      return (median);
+   return (median);
    }
 
 double OpenNI2TimerFilter::getMovingAvg() const
@@ -84,7 +83,7 @@ double OpenNI2TimerFilter::getMovingAvg() const
       avg = sum / static_cast<double>(buffer_.size());
       }
 
-      return (avg);
+   return (avg);
    }
 
-   } // namespace openni2_wrapper
+   }  // namespace openni2_wrapper
