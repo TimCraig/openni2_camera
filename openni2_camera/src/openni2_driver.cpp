@@ -399,7 +399,7 @@ void OpenNI2Driver::colorConnectCb()
          device_->stopIRStream();
          }
 
-      device_->setColorFrameCallback(boost::bind(&OpenNI2Driver::newColorFrameCallback, this, _1));
+      device_->setColorFrameCallback(std::bind(&OpenNI2Driver::newColorFrameCallback, this, _1));
 
       RCLCPP_INFO(get_logger(), "Starting color stream.");
       device_->startColorStream();
@@ -424,7 +424,7 @@ void OpenNI2Driver::colorConnectCb()
       bool need_ir = pub_ir_.getNumSubscribers() > 0;
       if (need_ir && !device_->isIRStreamStarted())
          {
-         device_->setIRFrameCallback(boost::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
+         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
 
          RCLCPP_INFO(get_logger(), "Starting IR stream.");
          device_->startIRStream();
@@ -452,7 +452,7 @@ void OpenNI2Driver::depthConnectCb()
 
    if (need_depth && !device_->isDepthStreamStarted())
       {
-      device_->setDepthFrameCallback(boost::bind(&OpenNI2Driver::newDepthFrameCallback, this, _1));
+      device_->setDepthFrameCallback(std::bind(&OpenNI2Driver::newDepthFrameCallback, this, _1));
 
       RCLCPP_INFO(get_logger(), "Starting depth stream.");
       device_->startDepthStream();
@@ -489,7 +489,7 @@ void OpenNI2Driver::irConnectCb()
          }
       else
          {
-         device_->setIRFrameCallback(boost::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
+         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
 
          RCLCPP_INFO(get_logger(), "Starting IR stream.");
          device_->startIRStream();
