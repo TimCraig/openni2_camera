@@ -40,9 +40,8 @@
 #include "openni2_camera/openni2_frame_listener.h"
 #include "openni2_camera/openni2_video_mode.h"
 
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <cstdint>
 
 #include <rclcpp/rclcpp.hpp>

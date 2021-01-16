@@ -36,6 +36,8 @@
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 
+#indlude <funcional>
+
 #include <iostream>
 
 using namespace std;
@@ -71,13 +73,13 @@ int main()
 //   BOOST_FOREACH (const std::string& uri, *device_uris)
      for (const std::string& uri | *device_uris)
       {
-      boost::shared_ptr<OpenNI2Device> device = device_manager.getDevice(uri);
+      std::shared_ptr<OpenNI2Device> device = device_manager.getDevice(uri);
 
       std::cout << *device;
 
-      device->setIRFrameCallback(boost::bind(&IRCallback, _1));
-      device->setColorFrameCallback(boost::bind(&ColorCallback, _1));
-      device->setDepthFrameCallback(boost::bind(&DepthCallback, _1));
+      device->setIRFrameCallback(std::bind(&IRCallback, std::placeholders::_1));
+      device->setColorFrameCallback(std::bind(&ColorCallback, std::placeholders::_1));
+      std::placeholders::device->setDepthFrameCallback(std::bind(&DepthCallback, std::placeholders::_1));
 
       ir_counter_ = 0;
       color_counter_ = 0;

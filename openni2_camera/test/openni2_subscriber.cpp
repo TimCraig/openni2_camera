@@ -25,7 +25,7 @@ class Openni2Subscriber : public rclcpp::Node
 public:
   Openni2Subscriber() : Node("openni2_subscriber")
   {
-    subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
+    subscription_ = create_subscription<sensor_msgs::msg::Image>(
       "/camera/depth/image", 10, std::bind(&Openni2Subscriber::topic_callback, this, _1));
   }
 

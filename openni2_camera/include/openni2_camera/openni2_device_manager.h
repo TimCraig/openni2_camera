@@ -36,8 +36,6 @@
 
 #include "openni2_camera/openni2_device_info.h"
 
-#include <boost/thread/mutex.hpp>
-
 #include <rclcpp/rclcpp.hpp>
 
 #include <ostream>

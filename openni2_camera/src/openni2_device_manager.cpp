@@ -34,10 +34,10 @@
 #include "openni2_camera/openni2_device.h"
 #include "openni2_camera/openni2_exception.h"
 
-//#include <boost/make_shared.hpp>
-
 #include <rclcpp/rclcpp.hpp>
 
+//#include <boost/thread/mutex.hpp>
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -114,7 +114,7 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
    virtual void onDeviceConnected(const openni::DeviceInfo* pInfo)
       {
-      boost::mutex::scoped_lock l(device_mutex_);
+      std::lock_guard<std::mutex> l(device_mutex_);
 
       const OpenNI2DeviceInfo device_info_wrapped = openni2_convert(pInfo);
 
@@ -129,7 +129,7 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
    virtual void onDeviceDisconnected(const openni::DeviceInfo* pInfo)
       {
-      boost::mutex::scoped_lock l(device_mutex_);
+      std::lock_guard<std::mutex> l(device_mutex_);
 
       RCLCPP_WARN(rclcpp::get_logger("openni2"), "Device \"%s\" disconnected\n", pInfo->getUri());
 
@@ -141,7 +141,7 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
    std::shared_ptr<std::vector<std::string>> getConnectedDeviceURIs()
       {
-      boost::mutex::scoped_lock l(device_mutex_);
+      std::lock_guard<std::mutex> l(device_mutex_);
 
       std::shared_ptr<std::vector<std::string>> result = std::make_shared<std::vector<std::string>>();
 
@@ -158,7 +158,7 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
    std::shared_ptr<std::vector<OpenNI2DeviceInfo>> getConnectedDeviceInfos()
       {
-      boost::mutex::scoped_lock l(device_mutex_);
+      std::lock_guard<std::mutex> l(device_mutex_);
 
       std::shared_ptr<std::vector<OpenNI2DeviceInfo>> result = std::make_shared<std::vector<OpenNI2DeviceInfo>>();
 
@@ -177,12 +177,12 @@ class OpenNI2DeviceListener : public openni::OpenNI::DeviceConnectedListener,
 
    std::size_t getNumOfConnectedDevices()
       {
-      boost::mutex::scoped_lock l(device_mutex_);
+      std::lock_guard<std::mutex> l(device_mutex_);
 
       return (device_set_.size());
       }
 
-   boost::mutex device_mutex_;
+   std::mutex device_mutex_;
    DeviceSet device_set_;
    };
 

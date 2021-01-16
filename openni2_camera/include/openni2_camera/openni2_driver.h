@@ -34,11 +34,6 @@
 #ifndef OPENNI2_DRIVER_H
 #define OPENNI2_DRIVER_H
 
-//#include <boost/bind.hpp>
-#include <boost/function.hpp>
-// #include <boost/shared_ptr.hpp>
-#include <cstdint>
-
 #include <sensor_msgs/msg/image.hpp>
 
 #include <camera_info_manager/camera_info_manager.hpp>
@@ -53,6 +48,9 @@
 #include "openni2_camera_msgs/srv/get_serial.hpp"
 
 #include <rclcpp/rclcpp.hpp>
+
+//#include <boost/thread/mutex.hpp>
+#include <mutex>
 
 namespace openni2_wrapper
    {
@@ -136,7 +134,8 @@ class OpenNI2Driver : public rclcpp::Node
    /** \brief get_serial server*/
    rclcpp::Service<openni2_camera_msgs::srv::GetSerial>::SharedPtr get_serial_server;
 
-   boost::mutex connect_mutex_;
+   std::mutex connect_mutex_;
+
    // published topics
    image_transport::CameraPublisher pub_color_;
    image_transport::CameraPublisher pub_depth_;

@@ -35,11 +35,15 @@
 #include <sensor_msgs/distortion_models.hpp>
 #include <sensor_msgs/image_encodings.hpp>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
+#include <functional>
+#include <thread>
+#include <chrono>
 
 namespace openni2_wrapper
    {
+
+using namespace std::chrono_literals;
+
 OpenNI2Driver::OpenNI2Driver(const rclcpp::NodeOptions& node_options)
       : Node("openni2_camera", node_options),
         device_manager_(OpenNI2DeviceManager::getSingelton()),
@@ -160,7 +164,7 @@ void OpenNI2Driver::advertiseROSTopics()
    // (say) "depth/image_raw", but before we actually assign to
    // pub_depth_raw_. Then pub_depth_raw_.getNumSubscribers() returns 0,
    // and we fail to start the depth generator.
-   boost::lock_guard<boost::mutex> lock(connect_mutex_);
+   std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // Asus Xtion PRO does not have an RGB camera
    if (device_->hasColorSensor())
@@ -383,7 +387,7 @@ void OpenNI2Driver::colorConnectCb()
       return;
       }
 
-   boost::lock_guard<boost::mutex> lock(connect_mutex_);
+   std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // This does not appear to work
    color_subscribers_ = pub_color_.getNumSubscribers() > 0;
@@ -399,7 +403,7 @@ void OpenNI2Driver::colorConnectCb()
          device_->stopIRStream();
          }
 
-      device_->setColorFrameCallback(std::bind(&OpenNI2Driver::newColorFrameCallback, this, _1));
+      device_->setColorFrameCallback(std::bind(&OpenNI2Driver::newColorFrameCallback, this, std::placeholders::_1));
 
       RCLCPP_INFO(get_logger(), "Starting color stream.");
       device_->startColorStream();
@@ -411,7 +415,7 @@ void OpenNI2Driver::colorConnectCb()
          RCLCPP_INFO_STREAM(get_logger(), "Exposure is set to " << exposure_ << ", forcing on color stream start");
          // delay for stream to start, before setting
          // exposure
-         boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+         std::this_thread::sleep_for(100ms);
          forceSetExposure();
          }
       }
@@ -424,7 +428,7 @@ void OpenNI2Driver::colorConnectCb()
       bool need_ir = pub_ir_.getNumSubscribers() > 0;
       if (need_ir && !device_->isIRStreamStarted())
          {
-         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
+         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, std::placeholders::_1));
 
          RCLCPP_INFO(get_logger(), "Starting IR stream.");
          device_->startIRStream();
@@ -441,7 +445,7 @@ void OpenNI2Driver::depthConnectCb()
       RCLCPP_WARN_STREAM(get_logger(), "Callback in " << __FUNCTION__ << "failed due to null device");
       return;
       }
-   boost::lock_guard<boost::mutex> lock(connect_mutex_);
+   std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // These does not appear to work
    depth_subscribers_ = pub_depth_.getNumSubscribers() > 0;
@@ -452,7 +456,7 @@ void OpenNI2Driver::depthConnectCb()
 
    if (need_depth && !device_->isDepthStreamStarted())
       {
-      device_->setDepthFrameCallback(std::bind(&OpenNI2Driver::newDepthFrameCallback, this, _1));
+      device_->setDepthFrameCallback(std::bind(&OpenNI2Driver::newDepthFrameCallback, this, std::placeholders::_1));
 
       RCLCPP_INFO(get_logger(), "Starting depth stream.");
       device_->startDepthStream();
@@ -474,7 +478,7 @@ void OpenNI2Driver::irConnectCb()
       return;
       }
 
-   boost::lock_guard<boost::mutex> lock(connect_mutex_);
+   std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // This does not appear to work
    // ir_subscribers_ = pub_ir_.getNumSubscribers() > 0;
@@ -489,7 +493,7 @@ void OpenNI2Driver::irConnectCb()
          }
       else
          {
-         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, _1));
+         device_->setIRFrameCallback(std::bind(&OpenNI2Driver::newIRFrameCallback, this, std::placeholders::_1));
 
          RCLCPP_INFO(get_logger(), "Starting IR stream.");
          device_->startIRStream();
@@ -882,7 +886,7 @@ void OpenNI2Driver::initDevice()
          if (!device_)
             {
             RCLCPP_INFO(get_logger(), "No matching device found.... waiting for devices. Reason: %s", exception.what());
-            boost::this_thread::sleep(boost::posix_time::seconds(3));
+            std::this_thread::sleep_for(3s);
             continue;
             }
          else
@@ -896,7 +900,7 @@ void OpenNI2Driver::initDevice()
    while (rclcpp::ok() && !device_->isValid())
       {
       RCLCPP_ERROR(get_logger(), "Waiting for device initialization..");
-      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+      std::this_thread::sleep_for(100ms);
       }
 
    return;
@@ -946,7 +950,7 @@ void OpenNI2Driver::monitorConnection()
          try
             {
                {
-               boost::lock_guard<boost::mutex> lock(connect_mutex_);
+               std::lock_guard<std::mutex> lock(connect_mutex_);
                std::string device_URI = resolveDeviceURI(device_id_);
                device_ = device_manager_->getDevice(device_URI, this);
                bus_id_ = extractBusID(device_->getUri());
@@ -954,7 +958,7 @@ void OpenNI2Driver::monitorConnection()
                   {
                   RCLCPP_INFO(get_logger(), "Waiting for device initialization, before "
                               "configuring and restarting publishers");
-                  boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                  std::this_thread::sleep_for(100ms);
                   }
                }
             RCLCPP_INFO_STREAM(get_logger(), "Re-applying configuration to camera on re-init");
@@ -986,7 +990,7 @@ void OpenNI2Driver::monitorConnection()
                RCLCPP_INFO_STREAM(get_logger(), "Waiting for color camera to come up and adjust");
                // It takes about 2.5 seconds
                // for the camera to adjust
-               boost::this_thread::sleep(boost::posix_time::milliseconds(2500));
+               std::this_thread::sleep_for(2500ms);
                RCLCPP_WARN_STREAM(get_logger(), "Resetting auto exposure and white balance to previous values");
                device_->setAutoExposure(auto_exposure_);
                device_->setAutoWhiteBalance(auto_white_balance_);
