@@ -21,27 +21,28 @@
 using std::placeholders::_1;
 
 class Openni2Subscriber : public rclcpp::Node
-{
-public:
-  Openni2Subscriber() : Node("openni2_subscriber")
   {
-    subscription_ = create_subscription<sensor_msgs::msg::Image>(
-      "/camera/depth/image", 10, std::bind(&Openni2Subscriber::topic_callback, this, _1));
-  }
+  public:
+    Openni2Subscriber() : Node("openni2_subscriber")
+      {
+      subscription_ = create_subscription<sensor_msgs::msg::Image>(
+        "/camera/depth/image", 10, std::bind(&Openni2Subscriber::topic_callback, this, _1));
+      }
 
-private:
-  void topic_callback(const sensor_msgs::msg::Image::SharedPtr image) const
-    {
-   // RCLCPP_INFO(get_logger(), "Received Image (" << image->width << "," << image->height << ")");
-    }
+  private:
+    void topic_callback(const sensor_msgs::msg::Image::SharedPtr image) const
+      {
+      RCLCPP_INFO(get_logger(), "Received Image (%d,%d)\n", image->width, image->height);
+      }
 
-  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
-};
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
+  };
 
-int main(int argc, char * argv[])
-{
+int main(int argc, char* argv[])
+  {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Openni2Subscriber>());
   rclcpp::shutdown();
+
   return 0;
-}
+  }

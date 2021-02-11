@@ -38,9 +38,6 @@
 #include "openni2_camera/openni2_device.h"
 #include "openni2_camera/openni2_exception.h"
 
-//#include <boost/make_shared.hpp>
-//#include <boost/shared_ptr.hpp>
-
 #include <string>
 #include <memory>
 

@@ -226,11 +226,13 @@ std::size_t OpenNI2DeviceManager::getNumOfConnectedDevices() const
 
 std::string OpenNI2DeviceManager::getSerial(const std::string& Uri) const
    {
+   RCLCPP_INFO(rclcpp::get_logger("openni2_device_manager"), "OpenNI2DeviceManager::getSerial %s", Uri.c_str());
+
    openni::Device openni_device;
    std::string ret;
 
-   // we need to open the device to query the serial number
-   if (Uri.length() > 0 && openni_device.open(Uri.c_str()) == openni::STATUS_OK)
+   // we need to open the device to query the serial numberS == openni::STATUS_OK))
+   if ((Uri.length() > 0) && (openni_device.open(Uri.c_str()) == openni::STATUS_OK))
       {
       int serial_len = 100;
       char serial[serial_len];

@@ -390,7 +390,7 @@ void OpenNI2Driver::colorConnectCb()
    std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // This does not appear to work
-   color_subscribers_ = pub_color_.getNumSubscribers() > 0;
+   color_subscribers_ = (pub_color_.getNumSubscribers() > 0);
 
    if (color_subscribers_ && !device_->isColorStreamStarted())
       {
@@ -448,11 +448,11 @@ void OpenNI2Driver::depthConnectCb()
    std::lock_guard<std::mutex> lock(connect_mutex_);
 
    // These does not appear to work
-   depth_subscribers_ = pub_depth_.getNumSubscribers() > 0;
-   depth_raw_subscribers_ = pub_depth_raw_.getNumSubscribers() > 0;
-   projector_info_subscribers_ = pub_projector_info_->get_subscription_count() > 0;
+   depth_subscribers_ = (pub_depth_.getNumSubscribers() > 0);
+   depth_raw_subscribers_ = (pub_depth_raw_.getNumSubscribers() > 0);
+   projector_info_subscribers_ = (pub_projector_info_->get_subscription_count() > 0);
 
-   bool need_depth = depth_subscribers_ || depth_raw_subscribers_;
+   bool need_depth = (depth_subscribers_ || depth_raw_subscribers_);
 
    if (need_depth && !device_->isDepthStreamStarted())
       {
@@ -482,7 +482,7 @@ void OpenNI2Driver::irConnectCb()
 
    // This does not appear to work
    // ir_subscribers_ = pub_ir_.getNumSubscribers() > 0;
-   ir_subscribers_ = count_subscribers("ir/image") > 0 || count_subscribers("ir/camera_info") > 0;
+   ir_subscribers_ = ((count_subscribers("ir/image") > 0) || (count_subscribers("ir/camera_info") > 0));
 
    if (ir_subscribers_ && !device_->isIRStreamStarted())
       {
@@ -517,7 +517,7 @@ void OpenNI2Driver::newIRFrameCallback(sensor_msgs::msg::Image::SharedPtr image)
       }
 
    //std::cout << "newIRFrameCallback - counter=" << data_skip_ir_counter_ << " data_skip_=" << data_skip_ << " ir_subscribers_=" << ir_subscribers_ << std::endl;
-   if ((++data_skip_ir_counter_) % data_skip_ == 0)
+   if (((++data_skip_ir_counter_) % data_skip_) == 0)
       {
       data_skip_ir_counter_ = 0;
 
@@ -565,7 +565,7 @@ void OpenNI2Driver::newDepthFrameCallback(sensor_msgs::msg::Image::SharedPtr ima
       return;
       }
 
-   if ((++data_skip_depth_counter_) % data_skip_ == 0)
+   if (((++data_skip_depth_counter_) % data_skip_) == 0)
       {
       data_skip_depth_counter_ = 0;
 
@@ -729,7 +729,7 @@ sensor_msgs::msg::CameraInfo::SharedPtr OpenNI2Driver::getDepthCameraInfo(int wi
    // hardware correlation window (probably 9x9 or 9x7 in 640x480 mode).
    // See http://www.ros.org/wiki/kinect_calibration/technical
 
-   double scaling = (double)width / 640;
+   double scaling = static_cast<double>(width) / 640.0;
 
    sensor_msgs::msg::CameraInfo::SharedPtr info = getIRCameraInfo(width, height, time);
    info->k[2] -= depth_ir_offset_x_ * scaling;  // cx
@@ -785,7 +785,7 @@ std::string OpenNI2Driver::resolveDeviceURI(const std::string& device_id)
    //   <number> is the device number, for consistency with
    //   openni_camera, these start at 1
    //               although 0 specifies "any device on this bus"
-   else if (device_id.size() > 1 && device_id.find('@') != std::string::npos && device_id.find('/') == std::string::npos)
+   else if ((device_id.size() > 1) && (device_id.find('@') != std::string::npos) && (device_id.find('/') == std::string::npos))
       {
       // get index of @ character
       size_t index = device_id.find('@');
@@ -979,7 +979,7 @@ void OpenNI2Driver::monitorConnection()
             // reconnection when auto exposure and
             // white balance are disabled, and FIXED
             // exposure is used instead.
-            if ((!auto_exposure_ && !auto_white_balance_) && exposure_ == 0)
+            if ((!auto_exposure_ && !auto_white_balance_) && (exposure_ == 0))
                {
                RCLCPP_WARN_STREAM(get_logger(), "Reconnection should not be enabled if auto expousre"
                                         "/white balance are disabled.  Temporarily working around this issue");

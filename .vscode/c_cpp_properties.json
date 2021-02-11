@@ -7,7 +7,9 @@
                 "/opt/ros/foxy/include/**",
                 "~/ros2/openni2_ws/src/openni2_camera/**",
                 "~/ros2/openni2_ws/src/openni2_camera/openni2_camera_msgs/**",
-                "~/ros2/openni2_ws/installs/**"
+                "~/ros2/openni2_ws/installs/**",
+                "/usr/include/opencv4/**",
+                "/usr/include/openni2"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
